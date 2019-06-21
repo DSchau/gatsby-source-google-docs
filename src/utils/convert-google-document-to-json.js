@@ -35,12 +35,13 @@ function getNestedListIndent(level, listTag) {
 }
 
 function getTextFromParagraph(p) {
+  if (!p.elements) {
+    return ``
+  }
   return p.elements
-    ? p.elements
-        .filter(el => el.textRun && el.textRun.content !== "\n")
-        .map(el => (el.textRun ? el.textRun.content : ""))
-        .join("")
-    : ""
+    .filter(el => el.textRun && el.textRun.content !== `\n`)
+    .map(el => el.textRun.content)
+    .join("")
 }
 
 function getTableCellContent(content) {
@@ -51,6 +52,10 @@ function getTableCellContent(content) {
 }
 
 function getText(element, {isHeader = false}) {
+  if (!element || !element.textRun) {
+    return ``
+  }
+
   let text = cleanText(element.textRun.content)
   const {
     link,
