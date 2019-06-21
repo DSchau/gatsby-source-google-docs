@@ -7,14 +7,14 @@ const normalize = markdown => {
     return markdown
   }
 
-  return markdown.replace(/---([\s\S]+)---/, (_, group) => {
+  return markdown.replace(/\n*---([\s\S]+)---/, (_, group) => {
     return `---\n${group.trim().replace(/\n+/g, "\n")}\n---`
   })
 }
 
 module.exports = ({content, file}) => {
   const {content: markdown, data: frontmatter} = matter(
-    json2md(normalize(content))
+    normalize(json2md(content))
   )
   return `---
 ${YAML.stringify(Object.assign({}, file, frontmatter))}---
