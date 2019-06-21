@@ -1,6 +1,7 @@
 const fs = require("fs")
 const {google} = require("googleapis")
 const readline = require("readline-sync")
+const opn = require("better-opn")
 
 async function getToken({access_type, client, scope, token_path}) {
   if (fs.existsSync(token_path)) {
@@ -38,8 +39,16 @@ async function getNewToken({access_type, client, scope}) {
     scope,
   })
 
-  /* eslint-disable-next-line */
-  console.info("Authorize this app by visiting this url:", authUrl)
+  fs.writeFileSync(
+    require("path").resolve("test.json"),
+    JSON.stringify({
+      authUrl,
+    }),
+    "utf8"
+  )
+
+  opn(decodeURIComponent(authUrl))
+
   const code = readline.question("Enter the code from that page here: ")
   const {tokens} = await client.getToken(code)
   return tokens
