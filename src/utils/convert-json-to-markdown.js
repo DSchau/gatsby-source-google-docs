@@ -1,9 +1,10 @@
 const json2md = require("json2md")
 const YAML = require("yamljs")
 const prettier = require("prettier")
+const graymatter = require("gray-matter")
 
 const normalize = (content, file) => {
-  let frontmatter = {}
+  let frontmatter = []
   let normalized = []
   for (let i = 0; i < content.length; i++) {
     const line = content[i]
@@ -11,10 +12,7 @@ const normalize = (content, file) => {
     if (line.p === "---") {
       let nextIndex = i + 1
       while (content[nextIndex].p !== "---") {
-        const [key, value = ""] = content[nextIndex].p.split(/\s*:\s*/)
-        if (key && value) {
-          frontmatter[key] = value.replace(/[“”]/g, "")
-        }
+        frontmatter.push(content[nextIndex])
         nextIndex += 1
       }
       i = nextIndex
@@ -55,7 +53,18 @@ const normalize = (content, file) => {
 
   return {
     markdown,
-    frontmatter: Object.assign({}, file, frontmatter),
+    frontmatter: graymatter(
+      [`---`]
+        .concat(Object.keys(file).map(key => `${key}: ${file[key]}`))
+        .concat(
+          json2md(frontmatter)
+            .replace(/\n+/g, "\n")
+            .replace(/[“”]/g, '"')
+            .trim()
+        )
+        .concat(`---`)
+        .join("\n")
+    ).data,
   }
 }
 
